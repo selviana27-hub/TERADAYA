@@ -64,14 +64,13 @@ export default function Navigation() {
 
         {/* LOGO (Sekarang otomatis akan bergeser ke ujung kiri) */}
     <Link href="/" className="flex items-center">
-      <Image
-          src="/logoTeradaya.png"
-          alt="Logo TERA DAYA"
-          width={200}
-          height={80}
-          priority
-          style={{ width: 'auto', height: 'auto' }}
-        />
+          <Image
+        src="/logoTeradaya.png"
+        alt="Logo TERA DAYA"
+        width={200}
+        height={80}
+        priority
+      />
     </Link>
 
        {/* MENU DESKTOP */}
