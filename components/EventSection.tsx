@@ -25,7 +25,7 @@ const events = [
     title: 'Gerakan Hijau Indonesia',
     date: '10 Juni 2026',
     location: 'Bogor',
-    image: '/event.jpg',
+    image: '/Event.jpg',
     status: 'Upcoming',
   },
 ];
