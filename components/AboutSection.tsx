@@ -120,7 +120,11 @@ export default function AboutSection() {
             {/* Floating Card */}
             <div className="absolute -bottom-8 -right-8 bg-white p-6 rounded-2xl shadow-xl">
               <h4 className="text-3xl font-bold text-purple-500">
+<<<<<<< HEAD
                 5.000+
+=======
+                500+
+>>>>>>> master
               </h4>
               <p className="text-gray-600">
                 Penerima Manfaat
@@ -222,7 +226,11 @@ export default function AboutSection() {
 
           <div className="text-center p-8 rounded-3xl bg-gray-50">
             <h3 className="text-4xl font-bold text-purple-500">
+<<<<<<< HEAD
               5.000+
+=======
+              500+
+>>>>>>> master
             </h3>
             <p className="text-gray-600 mt-2">
               Penerima Manfaat

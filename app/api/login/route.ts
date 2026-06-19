@@ -33,9 +33,13 @@ export async function POST(req: Request) {
       user: rows[0],
     });
 
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
-      { message: 'Server error' },
+      {
+        success: false,
+        error: String(error),
+        detail: error?.message,
+      },
       { status: 500 }
     );
   }
