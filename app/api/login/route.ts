@@ -34,12 +34,12 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-  console.error('LOGIN ERROR:', error);
-
   return NextResponse.json(
     {
-      message: 'Server error',
-      detail: error.message
+      success: false,
+      error: String(error),
+      detail: error?.message,
+      stack: error?.stack
     },
     { status: 500 }
     );
