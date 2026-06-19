@@ -9,13 +9,12 @@ export async function GET() {
       success: true,
       rows,
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      {
-        success: false,
-        error: err.message,
-      },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    return NextResponse.json({
+      success: false,
+      error: String(error),
+      detail: error?.message,
+      code: error?.code,
+    });
   }
 }
