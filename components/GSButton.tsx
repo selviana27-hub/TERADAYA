@@ -150,7 +150,7 @@ export default function TeamFloatingButton() {
               <div className="flex items-center gap-4">
 
                 <Image
-                  src="GeloraSelviana.jpeg"
+                  src="/GeloraSelviana.jpeg"
                   alt="Gelora Selviana"
                   width={75}
                   height={75}
@@ -194,7 +194,7 @@ export default function TeamFloatingButton() {
               <div className="flex items-center gap-4">
 
                 <Image
-                  src="AdellaEkaHamanda.jpeg"
+                  src="/AdellaEkaHamanda.jpeg"
                   alt="Adella Eka Hamanda"
                   width={75}
                   height={75}
@@ -236,8 +236,8 @@ export default function TeamFloatingButton() {
 
               <div className="flex items-center gap-4">
 
-                <Image
-                  src="Annisa Dwi Lestari.jpeg"
+                                <Image
+                  src="/Annisa Dwi Lestari.jpeg"
                   alt="Annisa Dwi Lestari"
                   width={75}
                   height={75}
