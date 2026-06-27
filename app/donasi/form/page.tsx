@@ -1,29 +1,52 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function DonasiForm() {
   const router = useRouter();
 
+  const [user, setUser] = useState<any>(null);
+
   const [form, setForm] = useState({
-    nama_lengkap: '',
     email: '',
-    no_hp: '',
     jumlah_donasi: '',
     metode_pembayaran: 'QRIS',
     pesan: '',
   });
 
+  useEffect(() => {
+    const dataUser = localStorage.getItem('user');
+
+    if (!dataUser) {
+      alert('Silakan login terlebih dahulu');
+      router.push('/login');
+      return;
+    }
+
+    setUser(JSON.parse(dataUser));
+  }, [router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) return;
+
+    const payload = {
+      username: user.username,
+      no_hp: user.no_hp,
+      email: form.email,
+      jumlah_donasi: form.jumlah_donasi,
+      metode_pembayaran: form.metode_pembayaran,
+      pesan: form.pesan,
+    };
 
     const res = await fetch('/api/donasi', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
 
     const data = await res.json();
@@ -51,31 +74,29 @@ export default function DonasiForm() {
 
       <div className="max-w-6xl mx-auto px-6 pb-20 grid md:grid-cols-2 gap-10">
 
-        {/* FORM DONASI */}
+        {/* FORM */}
         <div className="bg-white rounded-3xl shadow-xl p-8">
 
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
             Data Donatur
           </h2>
 
+          {user && (
+            <div className="bg-purple-50 p-4 rounded-xl mb-5">
+              <p>
+                <strong>Nama:</strong> {user.username}
+              </p>
+
+              <p>
+                <strong>No WhatsApp:</strong> {user.no_hp}
+              </p>
+            </div>
+          )}
+
           <form
             onSubmit={handleSubmit}
             className="space-y-5"
           >
-
-            <input
-              type="text"
-              placeholder="Nama Lengkap"
-              value={form.nama_lengkap}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  nama_lengkap: e.target.value,
-                })
-              }
-              className="w-full p-4 border rounded-xl"
-              required
-            />
 
             <input
               type="email"
@@ -85,20 +106,6 @@ export default function DonasiForm() {
                 setForm({
                   ...form,
                   email: e.target.value,
-                })
-              }
-              className="w-full p-4 border rounded-xl"
-              required
-            />
-
-            <input
-              type="text"
-              placeholder="Nomor WhatsApp"
-              value={form.no_hp}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  no_hp: e.target.value,
                 })
               }
               className="w-full p-4 border rounded-xl"
@@ -115,7 +122,10 @@ export default function DonasiForm() {
               }
               className="w-full p-4 border rounded-xl"
             >
-              <option value="QRIS">QRIS</option>
+              <option value="QRIS">
+                QRIS
+              </option>
+
               <option value="Transfer Bank">
                 Transfer Bank
               </option>
@@ -182,77 +192,47 @@ export default function DonasiForm() {
 
         </div>
 
-        {/* INFORMASI PEMBAYARAN */}
+        {/* INFO PEMBAYARAN */}
         <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
 
           {form.metode_pembayaran === 'QRIS' ? (
-
             <>
               <h2 className="text-2xl font-bold mb-3">
                 QRIS Donasi
               </h2>
 
-              <p className="text-gray-500 mb-6">
-                Scan QR Code untuk donasi cepat dan aman
-              </p>
-
-              <div className="bg-gray-50 p-6 rounded-2xl">
-                <img
-                  src="/QrisTeradaya.png"
-                  className="mx-auto w-64"
-                  alt="QRIS"
-                />
-              </div>
-
-              <div className="mt-6 text-sm text-gray-500 space-y-1">
-                <p>✔ Semua E-Wallet</p>
-                <p>✔ Semua Mobile Banking</p>
-                <p>✔ Aman dan cepat</p>
-              </div>
+              <img
+                src="/QrisTeradaya.png"
+                alt="QRIS"
+                className="mx-auto w-64"
+              />
             </>
-
           ) : (
-
             <>
               <h2 className="text-2xl font-bold mb-3">
                 Transfer Bank
               </h2>
 
-              <p className="text-gray-500 mb-6">
-                Silakan transfer donasi ke rekening berikut
-              </p>
-
               <div className="bg-gray-50 p-8 rounded-2xl border">
-
-                <div className="text-4xl mb-3">
-                  🏦
-                </div>
 
                 <h3 className="text-2xl font-bold text-blue-700">
                   Bank Mandiri
                 </h3>
 
-                <p className="mt-4 text-gray-700">
+                <p className="mt-4">
                   A.n
                 </p>
 
-                <p className="font-semibold text-lg">
+                <p className="font-bold text-lg">
                   TERA DAYA INDONESIA
                 </p>
 
-                <p className="text-3xl font-bold mt-4 text-gray-900">
+                <p className="text-3xl font-bold mt-4">
                   1640009728991
                 </p>
 
               </div>
-
-              <div className="mt-6 text-sm text-gray-500 space-y-1">
-                <p>✔ ATM Mandiri</p>
-                <p>✔ Livin' by Mandiri</p>
-                <p>✔ Transfer Antar Bank</p>
-              </div>
             </>
-
           )}
 
         </div>

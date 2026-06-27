@@ -7,12 +7,6 @@ async function kirimWhatsapp(
   pesan: string
 ) {
   try {
-    console.log('====================');
-    console.log('KIRIM WA');
-    console.log('TOKEN:', token);
-    console.log('TARGET:', target);
-    console.log('PESAN:', pesan);
-
     const res = await fetch(
       'https://api.fonnte.com/send',
       {
@@ -46,9 +40,9 @@ async function kirimWhatsapp(
   }
 }
 
-const formatNomor = (
+function formatNomor(
   nomor: string
-) => {
+) {
   nomor = nomor.trim();
 
   if (nomor.startsWith('0')) {
@@ -60,7 +54,7 @@ const formatNomor = (
   }
 
   return nomor;
-};
+}
 
 export async function POST(
   req: Request
@@ -68,13 +62,8 @@ export async function POST(
   try {
     const body = await req.json();
 
-    console.log(
-      'DATA DONASI MASUK:',
-      body
-    );
-
     const {
-      nama_lengkap,
+      username,
       email,
       no_hp,
       jumlah_donasi,
@@ -83,7 +72,7 @@ export async function POST(
     } = body;
 
     if (
-      !nama_lengkap ||
+      !username ||
       !email ||
       !no_hp ||
       !jumlah_donasi
@@ -92,7 +81,7 @@ export async function POST(
         {
           success: false,
           message:
-            'Data tidak lengkap',
+            'Data donasi tidak lengkap',
         },
         {
           status: 400,
@@ -103,8 +92,7 @@ export async function POST(
     const nomorDonatur =
       formatNomor(no_hp);
 
-    // SIMPAN DATABASE
-
+    // Simpan ke database
     await db.query(
       `
       INSERT INTO donasi
@@ -120,119 +108,97 @@ export async function POST(
       VALUES (?, ?, ?, ?, ?, ?, NOW())
       `,
       [
-        nama_lengkap,
+        username,
         email,
         nomorDonatur,
         jumlah_donasi,
         metode_pembayaran,
-        pesan,
+        pesan || '',
       ]
     );
-
-    console.log(
-      'DONASI BERHASIL DISIMPAN'
-    );
-
-    // AMBIL DATA ADMIN
 
     const [admins]: any =
       await db.query(
         'SELECT * FROM setting_whatsapp'
       );
 
-    console.log(
-      'DATA ADMIN:',
-      admins
-    );
-
-    if (
-      !admins ||
-      admins.length === 0
-    ) {
-      console.log(
-        'ADMIN TIDAK DITEMUKAN'
-      );
-
-      return NextResponse.json({
-        success: true,
-        message:
-          'Donasi berhasil disimpan',
-      });
-    }
-
-  
-    // TOKEN REBECCA (DEVICE CONNECT)
-    const token = 'aLyerSs9tbfr5WJ5Gy84';
+    const token =
+      'aLyerSs9tbfr5WJ5Gy84';
 
     const tanggal =
       new Date().toLocaleString(
         'id-ID'
       );
 
-          console.log(
-      'NOMOR DONATUR:',
-      nomorDonatur
-    );
-
-    console.log(
-      'TOKEN DONASI:',
-      token
-    );
-
-    // WA KE DONATUR
-
+    // WA ke donatur
     const pesanDonatur = `
-Hai Kak ${nama_lengkap} 👋
+Halo ${username} 👋
 
-Terima kasih banyak!
+Terima kasih telah berdonasi kepada Yayasan Tera Daya Indonesia.
 
-Donasi sebesar Rp${Number(
+Detail Donasi:
+
+💰 Nominal:
+Rp${Number(
       jumlah_donasi
     ).toLocaleString('id-ID')}
 
-telah kami terima pada
+💳 Metode:
+${metode_pembayaran}
 
+📅 Tanggal:
 ${tanggal}
 
-Kebaikanmu sangat berarti untuk membantu program sosial Yayasan Tera Daya Indonesia.
+Semoga kebaikan yang diberikan menjadi amal yang bermanfaat dan membawa keberkahan.
 
-Semoga berkah ya 🙏
-
-Admin Yayasan Tera Daya Indonesia
+Yayasan Tera Daya Indonesia
 `;
 
-    const hasilUser =
-      await kirimWhatsapp(
-        token,
-        nomorDonatur,
-        pesanDonatur
-      );
-
-    console.log(
-      'HASIL USER:',
-      hasilUser
+    await kirimWhatsapp(
+      token,
+      nomorDonatur,
+      pesanDonatur
     );
 
-    // WA KE ADMIN
+    // WA ke admin
+    if (
+      admins &&
+      admins.length > 0
+    ) {
+      for (const admin of admins) {
+        await kirimWhatsapp(
+          token,
+          formatNomor(
+            admin.nomor_admin
+          ),
+          `🔔 DONASI BARU
 
-    for (const admin of admins) {
-      await kirimWhatsapp(
-        token,
-        formatNomor(
-          admin.nomor_admin
-        ),
-        `DONASI BARU
+Nama Donatur:
+${username}
 
-Nama: ${nama_lengkap}
+Email:
+${email}
 
-Nominal:
+Nomor WhatsApp:
+${nomorDonatur}
+
+Metode Pembayaran:
+${metode_pembayaran}
+
+Nominal Donasi:
 Rp${Number(
-          jumlah_donasi
-        ).toLocaleString('id-ID')}
+            jumlah_donasi
+          ).toLocaleString(
+            'id-ID'
+          )}
 
-Nomor:
-${nomorDonatur}`
-      );
+Pesan:
+${pesan || '-'}
+
+Tanggal:
+${tanggal}`
+        );
+      }
     }
 
     return NextResponse.json({
@@ -240,6 +206,7 @@ ${nomorDonatur}`
       message:
         'Donasi berhasil disimpan',
     });
+
   } catch (error) {
     console.error(
       'DONASI ERROR:',
