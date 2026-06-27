@@ -19,21 +19,14 @@ async function kirimWhatsapp(
       }),
     });
 
-    const data = await res.json();
-
-    console.log('=== FONNTE RESPONSE ===');
-    console.log('TARGET:', target);
-    console.log('RESPONSE:', data);
-
-    return data;
+    return await res.json();
   } catch (err) {
-    console.error('❌ ERROR KIRIM WA:', err);
+    console.error('ERROR KIRIM WA:', err);
     return null;
   }
 }
 
-// Format nomor WA
-const formatNomor = (no: string) => {
+function formatNomor(no: string) {
   if (!no) return '';
 
   no = no.toString().trim();
@@ -47,21 +40,21 @@ const formatNomor = (no: string) => {
   }
 
   return no;
-};
+}
 
 export async function POST(req: Request) {
   try {
-    const { username, no_hp, password } =
-      await req.json();
+    const {
+      username,
+      no_hp,
+      password,
+    } = await req.json();
 
-    // Semua registrasi publik otomatis menjadi pengguna
-    const role = 'Pengguna';
-
-    // Jika nanti menggunakan sistem pengajuan admin
-    const status_admin = 'none';
-
-    // Validasi
-    if (!username || !no_hp || !password) {
+    if (
+      !username ||
+      !no_hp ||
+      !password
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -73,24 +66,24 @@ export async function POST(req: Request) {
       );
     }
 
-    const nomorUser = formatNomor(no_hp);
+    const role = 'user';
 
-    console.log('=== USER BARU ===');
-    console.log('USERNAME:', username);
-    console.log('NOMOR:', nomorUser);
-    console.log('ROLE:', role);
+    const nomorUser =
+      formatNomor(no_hp);
 
-    // Cek username
-    const [cek]: any = await db.query(
-      'SELECT * FROM users WHERE username = ?',
-      [username]
-    );
+    // cek username
+    const [cekUser]: any =
+      await db.query(
+        'SELECT id FROM users WHERE username = ?',
+        [username]
+      );
 
-    if (cek.length > 0) {
+    if (cekUser.length > 0) {
       return NextResponse.json(
         {
           success: false,
-          message: 'Username sudah digunakan',
+          message:
+            'Username sudah digunakan',
         },
         {
           status: 400,
@@ -98,11 +91,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // Simpan user
+    // simpan user
     await db.query(
       `
       INSERT INTO users
-      (username, no_hp, password, role)
+      (
+        username,
+        no_hp,
+        password,
+        role
+      )
       VALUES (?, ?, ?, ?)
       `,
       [
@@ -113,129 +111,102 @@ export async function POST(req: Request) {
       ]
     );
 
-    console.log('✅ USER BERHASIL DISIMPAN');
-
-    // Ambil data admin
-    const [admins]: any = await db.query(
-      'SELECT * FROM setting_whatsapp'
+    console.log(
+      'USER BERHASIL DISIMPAN'
     );
 
-    if (!admins || admins.length === 0) {
-      console.log('❌ ADMIN WHATSAPP TIDAK ADA');
+    // ======================
+    // WHATSAPP USER
+    // ======================
 
-      return NextResponse.json({
-        success: false,
-        message: 'Admin WhatsApp tidak ditemukan',
-      });
-    }
-
-    // TOKEN FONNTE
-    const token = 'aLyerSs9tbfr5WJ5Gy84';
-
-    // =====================
-    // PESAN KE USER
-    // =====================
+    const token =
+      process.env.FONNTE_TOKEN ||
+      'aLyerSs9tbfr5WJ5Gy84';
 
     const pesanUser = `
 Halo ${username} 👋
 
 Selamat datang di Yayasan Tera Daya Indonesia.
 
-Registrasi akun Anda telah berhasil.
+Registrasi akun Anda berhasil.
 
-Data akun Anda:
+Username : ${username}
+Nomor WA : ${nomorUser}
 
-👤 Username : ${username}
-📱 Nomor WA : ${nomorUser}
-🔑 Role : ${role}
-
-Silakan login ke sistem untuk menggunakan layanan yang tersedia.
+Silakan login ke sistem.
 
 Terima kasih.
-
-Admin Yayasan Tera Daya Indonesia
 `;
 
-    const resUser = await kirimWhatsapp(
+    await kirimWhatsapp(
       token,
       nomorUser,
       pesanUser
     );
 
-    console.log('========================');
-    console.log('HASIL KIRIM KE USER');
-    console.log(
-      JSON.stringify(resUser, null, 2)
-    );
-    console.log('========================');
+    // ======================
+    // WHATSAPP ADMIN
+    // ======================
 
-    if (!resUser || resUser.status !== true) {
-      console.log(
-        '❌ PESAN KE USER GAGAL TERKIRIM'
-      );
-    }
-
-    // =====================
-    // PESAN KE ADMIN
-    // =====================
-
-    const pesanAdmin = `
-🔔 PENDAFTAR BARU
-
-Nama      : ${username}
-Nomor WA  : ${nomorUser}
-Role      : ${role}
-
-Pengguna baru telah berhasil melakukan registrasi pada sistem Yayasan Tera Daya Indonesia.
-`;
-
-    for (const admin of admins) {
-      const nomorAdmin = formatNomor(
-        admin.nomor_admin
-      );
-
-      const resAdmin =
-        await kirimWhatsapp(
-          token,
-          nomorAdmin,
-          pesanAdmin
+    try {
+      const [admins]: any =
+        await db.query(
+          'SELECT * FROM setting_whatsapp'
         );
 
-      console.log(
-        `=== HASIL KIRIM KE ADMIN ${admin.nama_admin} ===`
-      );
+      if (
+        admins &&
+        admins.length > 0
+      ) {
+        const pesanAdmin = `
+🔔 PENDAFTAR BARU
 
-      console.log(
-        JSON.stringify(resAdmin, null, 2)
+Nama : ${username}
+Nomor WA : ${nomorUser}
+Role : user
+`;
+
+        for (const admin of admins) {
+          if (
+            admin.nomor_admin
+          ) {
+            await kirimWhatsapp(
+              token,
+              formatNomor(
+                admin.nomor_admin
+              ),
+              pesanAdmin
+            );
+          }
+        }
+      }
+    } catch (waAdminError) {
+      console.error(
+        'WA ADMIN ERROR:',
+        waAdminError
       );
     }
 
     return NextResponse.json({
       success: true,
       message:
-        'Registrasi berhasil dan WhatsApp berhasil dikirim',
+        'Registrasi berhasil',
     });
-
   } catch (error: any) {
-  console.error(
-    '❌ ERROR REGISTER:',
-    error
-  );
+    console.error(
+      'ERROR REGISTER:',
+      error
+    );
 
-  return NextResponse.json(
-    {
-      success: false,
-      message: 'Server Error',
-      error: String(error),
-      detail: error?.message,
-      stack:
-        process.env.NODE_ENV === 'development'
-          ? error?.stack
-          : undefined,
-    },
-    {
-      status: 500,
-    }
-  );
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'Server Error',
+        detail: error?.message,
+      },
+      {
+        status: 500,
+      }
+    );
   }
 }
