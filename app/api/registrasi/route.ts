@@ -216,20 +216,26 @@ Pengguna baru telah berhasil melakukan registrasi pada sistem Yayasan Tera Daya 
         'Registrasi berhasil dan WhatsApp berhasil dikirim',
     });
 
-  } catch (error) {
-    console.error(
-      '❌ ERROR REGISTER:',
-      error
-    );
+  } catch (error: any) {
+  console.error(
+    '❌ ERROR REGISTER:',
+    error
+  );
 
-    return NextResponse.json(
-      {
-        success: false,
-        message: 'Server Error',
-      },
-      {
-        status: 500,
-      }
-    );
+  return NextResponse.json(
+    {
+      success: false,
+      message: 'Server Error',
+      error: String(error),
+      detail: error?.message,
+      stack:
+        process.env.NODE_ENV === 'development'
+          ? error?.stack
+          : undefined,
+    },
+    {
+      status: 500,
+    }
+  );
   }
 }
