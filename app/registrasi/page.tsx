@@ -211,10 +211,6 @@ export default function RegisterPage() {
               <option value="user">
                 Pengguna
               </option>
-
-              <option value="admin">
-                Admin
-              </option>
             </select>
           </div>
 
