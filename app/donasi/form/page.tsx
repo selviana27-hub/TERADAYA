@@ -51,7 +51,7 @@ export default function DonasiForm() {
 
       <div className="max-w-6xl mx-auto px-6 pb-20 grid md:grid-cols-2 gap-10">
 
-        {/* FORM */}
+        {/* FORM DONASI */}
         <div className="bg-white rounded-3xl shadow-xl p-8">
 
           <h2 className="text-2xl font-bold mb-6 text-gray-800">
@@ -119,9 +119,6 @@ export default function DonasiForm() {
               <option value="Transfer Bank">
                 Transfer Bank
               </option>
-              <option value="E-Wallet">
-                E-Wallet
-              </option>
             </select>
 
             <div>
@@ -148,10 +145,10 @@ export default function DonasiForm() {
                         jumlah_donasi: val,
                       })
                     }
-                    className={`py-3 rounded-xl border ${
+                    className={`py-3 rounded-xl border transition ${
                       form.jumlah_donasi === val
                         ? 'bg-purple-500 text-white'
-                        : ''
+                        : 'hover:bg-gray-100'
                     }`}
                   >
                     Rp {Number(val).toLocaleString('id-ID')}
@@ -185,30 +182,78 @@ export default function DonasiForm() {
 
         </div>
 
-        {/* QRIS */}
+        {/* INFORMASI PEMBAYARAN */}
         <div className="bg-white rounded-3xl shadow-xl p-8 text-center">
 
-          <h2 className="text-2xl font-bold mb-3">
-            QRIS Donasi
-          </h2>
+          {form.metode_pembayaran === 'QRIS' ? (
 
-          <p className="text-gray-500 mb-6">
-            Scan QR Code untuk donasi cepat & aman
-          </p>
+            <>
+              <h2 className="text-2xl font-bold mb-3">
+                QRIS Donasi
+              </h2>
 
-          <div className="bg-gray-50 p-6 rounded-2xl">
-            <img
-              src="/QrisTeradaya.png"
-              className="mx-auto w-64"
-              alt="QRIS"
-            />
-          </div>
+              <p className="text-gray-500 mb-6">
+                Scan QR Code untuk donasi cepat dan aman
+              </p>
 
-          <div className="mt-6 text-sm text-gray-500 space-y-1">
-            <p>✔ Semua e-wallet & bank</p>
-            <p>✔ Proses otomatis</p>
-            <p>✔ Aman & cepat</p>
-          </div>
+              <div className="bg-gray-50 p-6 rounded-2xl">
+                <img
+                  src="/QrisTeradaya.png"
+                  className="mx-auto w-64"
+                  alt="QRIS"
+                />
+              </div>
+
+              <div className="mt-6 text-sm text-gray-500 space-y-1">
+                <p>✔ Semua E-Wallet</p>
+                <p>✔ Semua Mobile Banking</p>
+                <p>✔ Aman dan cepat</p>
+              </div>
+            </>
+
+          ) : (
+
+            <>
+              <h2 className="text-2xl font-bold mb-3">
+                Transfer Bank
+              </h2>
+
+              <p className="text-gray-500 mb-6">
+                Silakan transfer donasi ke rekening berikut
+              </p>
+
+              <div className="bg-gray-50 p-8 rounded-2xl border">
+
+                <div className="text-4xl mb-3">
+                  🏦
+                </div>
+
+                <h3 className="text-2xl font-bold text-blue-700">
+                  Bank Mandiri
+                </h3>
+
+                <p className="mt-4 text-gray-700">
+                  A.n
+                </p>
+
+                <p className="font-semibold text-lg">
+                  TERA DAYA INDONESIA
+                </p>
+
+                <p className="text-3xl font-bold mt-4 text-gray-900">
+                  1640009728991
+                </p>
+
+              </div>
+
+              <div className="mt-6 text-sm text-gray-500 space-y-1">
+                <p>✔ ATM Mandiri</p>
+                <p>✔ Livin' by Mandiri</p>
+                <p>✔ Transfer Antar Bank</p>
+              </div>
+            </>
+
+          )}
 
         </div>
 

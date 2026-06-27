@@ -51,11 +51,17 @@ const formatNomor = (no: string) => {
 
 export async function POST(req: Request) {
   try {
-    const { username, no_hp, password, role } =
+    const { username, no_hp, password } =
       await req.json();
 
+    // Semua registrasi publik otomatis menjadi pengguna
+    const role = 'Pengguna';
+
+    // Jika nanti menggunakan sistem pengajuan admin
+    const status_admin = 'none';
+
     // Validasi
-    if (!username || !no_hp || !password || !role) {
+    if (!username || !no_hp || !password) {
       return NextResponse.json(
         {
           success: false,
@@ -123,7 +129,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // TOKEN REBECCA (DEVICE CONNECT)
+    // TOKEN FONNTE
     const token = 'aLyerSs9tbfr5WJ5Gy84';
 
     // =====================
